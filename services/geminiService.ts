@@ -1,23 +1,17 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 export const generateVerseImage = async (verseText: string): Promise<string | null> => {
-  // Acceso seguro a la API_KEY
-  const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : undefined;
-  
-  if (!apiKey) {
-    console.warn("API_KEY no configurada. Las imágenes de IA no se generarán.");
-    return null;
-  }
-
   try {
-    const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Create a beautiful, inspirational, and professional aesthetic background image suitable for social media, themed around this Bible verse text: "${verseText}". Do not include the text itself in the image, just a symbolic background representing the mood (peace, nature, light, divinity).`;
-
+    // Inicialización usando la variable de entorno configurada
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+    
+    // Utilizamos gemini-2.5-flash-image para la generación de imágenes según las directrices
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [{ text: prompt }]
+        parts: [
+          { text: `Crea una imagen de fondo hermosa, inspiradora y profesional para un versículo bíblico. El ambiente debe reflejar: "${verseText}". Estilo: Fotografía de alta calidad o arte digital artístico, iluminación cinematográfica, sin texto dentro de la imagen.` }
+        ]
       },
       config: {
         imageConfig: {
@@ -26,16 +20,19 @@ export const generateVerseImage = async (verseText: string): Promise<string | nu
       }
     });
 
-    if (response.candidates && response.candidates[0].content.parts) {
-      for (const part of response.candidates[0].content.parts) {
+    // Buscamos la parte de imagen en la respuesta del modelo
+    const candidate = response.candidates?.[0];
+    if (candidate?.content?.parts) {
+      for (const part of candidate.content.parts) {
         if (part.inlineData) {
-          return `data:image/png;base64,${part.inlineData.data}`;
+          const base64EncodeString = part.inlineData.data;
+          return `data:image/png;base64,${base64EncodeString}`;
         }
       }
     }
     return null;
   } catch (error) {
-    console.error("Error generating image:", error);
+    console.error("Error al generar imagen con Gemini:", error);
     return null;
   }
 };

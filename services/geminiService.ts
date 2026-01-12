@@ -2,8 +2,13 @@
 import { GoogleGenAI } from "@google/genai";
 
 export const generateVerseImage = async (verseText: string): Promise<string | null> => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) return null;
+  // Acceso seguro a la API_KEY
+  const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : undefined;
+  
+  if (!apiKey) {
+    console.warn("API_KEY no configurada. Las imágenes de IA no se generarán.");
+    return null;
+  }
 
   try {
     const ai = new GoogleGenAI({ apiKey });
@@ -21,9 +26,11 @@ export const generateVerseImage = async (verseText: string): Promise<string | nu
       }
     });
 
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+    if (response.candidates && response.candidates[0].content.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
       }
     }
     return null;

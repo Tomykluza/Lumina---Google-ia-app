@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,27 +23,42 @@
   <style>
     body {
       -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
     }
     .bible-text {
       font-family: 'Lora', serif;
     }
-    /* Estilos para scrollbars en dark mode */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #334155;
     }
   </style>
+  <script>
+    // Evita errores de "process is not defined" en el navegador
+    window.process = { env: { API_KEY: "" } };
+  </script>
 <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
   }
 }
 </script>
 </head>
-<body class="bg-slate-50 text-slate-900 transition-colors duration-300">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 transition-colors duration-300">
   <div id="root"></div>
+  <!-- Vite requiere la ruta absoluta o relativa al root del proyecto -->
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@
   "name": "Lumina Bible",
   "description": "A comprehensive Bible application featuring reading plans, audio content, verse highlighting, and AI-powered verse image generation.",
   "requestFramePermissions": [
-    "microphone"
+    "microphone",
+    "camera"
   ]
 }

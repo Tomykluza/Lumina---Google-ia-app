@@ -59,9 +59,11 @@ const App: React.FC = () => {
     const savedPodcasts = localStorage.getItem('lumina_podcasts');
 
     if (savedUser) {
-      // Fix: cast the parsed object to User to ensure type safety
       const u = JSON.parse(savedUser) as User;
-      if (u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) u.role = 'admin';
+      // Robust check: trim spaces and lowercase
+      if (u.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        u.role = 'admin';
+      }
       setUser(u);
     }
     if (savedSettings) {
@@ -88,10 +90,10 @@ const App: React.FC = () => {
   useEffect(() => { localStorage.setItem('lumina_highlights', JSON.stringify(highlights)); }, [highlights]);
 
   const handleLogin = (u: User) => {
-    // Fix: Explicitly type userWithRole as User to prevent string widening of the role property
+    // Robust check on login
     const userWithRole: User = { 
       ...u, 
-      role: (u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) ? 'admin' : 'user' 
+      role: (u.email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) ? 'admin' : 'user' 
     };
     setUser(userWithRole);
     localStorage.setItem('lumina_user', JSON.stringify(userWithRole));
@@ -149,8 +151,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 max-w-lg mx-auto border-x border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative transition-colors duration-300`}>
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center safe-top">
+    <div className={`flex flex-col h-full bg-slate-50 dark:bg-slate-950 max-w-lg mx-auto border-x border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden relative transition-colors duration-300`}>
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex justify-between items-center safe-top flex-shrink-0">
         <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 cursor-pointer" onClick={() => setCurrentView(View.HOME)}>
           <span className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-serif italic text-lg shadow-lg shadow-blue-500/20">L</span>
           Lumina
@@ -158,7 +160,7 @@ const App: React.FC = () => {
         <img src={user.photo} alt={user.name} className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover cursor-pointer ring-2 ring-transparent hover:ring-blue-500 transition-all" onClick={() => setCurrentView(View.PROFILE)} />
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto custom-scrollbar relative">
         {currentView === View.HOME && (
           <Home 
             t={t} plans={plans} 

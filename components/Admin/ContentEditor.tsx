@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { AppContent, ContentType, ReadingPlan, Audiobook, Podcast, DayContent } from '../../types';
 
 interface ContentEditorProps {
@@ -11,6 +11,7 @@ interface ContentEditorProps {
 
 const ContentEditor: React.FC<ContentEditorProps> = ({ type, item, onSave, onClose }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'content'>('basic');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<any>(item || {
     id: `id-${Date.now()}`,
@@ -60,6 +61,43 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ type, item, onSave, onClo
         episodes: [...formData.episodes, { id: `e-${Date.now()}`, title: 'Nuevo Episodio', date: new Date().toLocaleDateString(), url: '#' }]
       });
     }
+  };
+
+  const handleJsonUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result as string);
+        if (Array.isArray(json)) {
+          // Map incoming JSON to DayContent structure, supporting flexible keys
+          const newDays: DayContent[] = json.map((d: any, index: number) => ({
+            dayNumber: d.dayNumber || d.dia || d.day || index + 1,
+            title: d.title || d.nombre_reflexion || d.titulo || `Día ${index + 1}`,
+            devotional: d.devotional || d.texto_reflexion || d.reflexion || '',
+            bibleReference: d.bibleReference || d.referencia_biblica || d.referencia || '',
+            bibleText: d.bibleText || d.texto_biblico || d.texto || ''
+          }));
+
+          setFormData((prev: any) => ({
+            ...prev,
+            durationDays: newDays.length, // Auto update duration
+            days: newDays
+          }));
+          alert(`¡Éxito! Se importaron ${newDays.length} días de contenido.`);
+        } else {
+          alert('El archivo JSON debe contener un arreglo (array) de objetos.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error al leer el archivo JSON. Verifique el formato.');
+      }
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -159,39 +197,62 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ type, item, onSave, onClo
             ) : (
               <div className="space-y-6">
                 {type === 'plan' && (
-                  <div className="space-y-8">
-                    {formData.days.map((day: DayContent, idx: number) => (
-                      <div key={idx} className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
-                        <h4 className="font-black text-blue-600 dark:text-blue-400 text-xs uppercase tracking-widest">Día {day.dayNumber}</h4>
-                        <input 
-                          placeholder="Título del día"
-                          className="w-full bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-sm font-bold"
-                          value={day.title}
-                          onChange={e => updateDay(idx, 'title', e.target.value)}
-                        />
-                        <textarea 
-                          placeholder="Reflexión devocional"
-                          className="w-full bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-xs font-medium h-20 resize-none"
-                          value={day.devotional}
-                          onChange={e => updateDay(idx, 'devotional', e.target.value)}
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <input 
-                            placeholder="Cita (Juan 3:16)"
-                            className="bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-[10px] font-bold"
-                            value={day.bibleReference}
-                            onChange={e => updateDay(idx, 'bibleReference', e.target.value)}
-                          />
-                          <input 
-                            placeholder="Texto bíblico"
-                            className="bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-[10px] font-medium"
-                            value={day.bibleText}
-                            onChange={e => updateDay(idx, 'bibleText', e.target.value)}
-                          />
-                        </div>
+                  <>
+                    <div className="flex justify-between items-center bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800 mb-6">
+                      <div className="text-indigo-900 dark:text-indigo-200">
+                        <p className="text-xs font-bold">Importar JSON</p>
+                        <p className="text-[10px] opacity-70">Carga masiva de días</p>
                       </div>
-                    ))}
-                  </div>
+                      <input 
+                        type="file" 
+                        accept=".json" 
+                        ref={fileInputRef} 
+                        onChange={handleJsonUpload} 
+                        className="hidden" 
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-indigo-600 text-white text-[10px] font-black uppercase px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 transition-colors"
+                      >
+                        Subir Archivo
+                      </button>
+                    </div>
+
+                    <div className="space-y-8">
+                      {formData.days.map((day: DayContent, idx: number) => (
+                        <div key={idx} className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4">
+                          <h4 className="font-black text-blue-600 dark:text-blue-400 text-xs uppercase tracking-widest">Día {day.dayNumber}</h4>
+                          <input 
+                            placeholder="Título del día"
+                            className="w-full bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-sm font-bold"
+                            value={day.title}
+                            onChange={e => updateDay(idx, 'title', e.target.value)}
+                          />
+                          <textarea 
+                            placeholder="Reflexión devocional"
+                            className="w-full bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-xs font-medium h-20 resize-none"
+                            value={day.devotional}
+                            onChange={e => updateDay(idx, 'devotional', e.target.value)}
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <input 
+                              placeholder="Cita (Juan 3:16)"
+                              className="bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-[10px] font-bold"
+                              value={day.bibleReference}
+                              onChange={e => updateDay(idx, 'bibleReference', e.target.value)}
+                            />
+                            <textarea 
+                              placeholder="Texto bíblico completo"
+                              className="bg-white dark:bg-slate-900 border-none rounded-xl p-3 text-[10px] font-medium h-16 resize-none"
+                              value={day.bibleText}
+                              onChange={e => updateDay(idx, 'bibleText', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
 
                 {(type === 'audiobook' || type === 'podcast') && (

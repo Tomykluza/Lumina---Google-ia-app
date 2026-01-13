@@ -68,7 +68,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeView, setView, t }) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 flex justify-around items-center px-2 py-2 z-50 transition-colors safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 mx-auto max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 flex justify-around items-center px-2 py-2 z-50 transition-colors safe-bottom rounded-t-2xl shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)]">
       {tabs.map(tab => (
         <button
           key={tab.id}

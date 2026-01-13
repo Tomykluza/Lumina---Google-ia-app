@@ -32,6 +32,16 @@ const Navigation: React.FC<NavigationProps> = ({ activeView, setView, t }) => {
       )
     },
     { 
+      id: View.AI_STUDY, 
+      label: 'Estudio', 
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+      )
+    },
+    { 
       id: View.PLANS, 
       label: t.nav_plans, 
       icon: (
@@ -41,17 +51,6 @@ const Navigation: React.FC<NavigationProps> = ({ activeView, setView, t }) => {
           <line x1="8" y1="2" x2="8" y2="6" />
           <line x1="3" y1="10" x2="21" y2="10" />
           <path d="m9 16 2 2 4-4" />
-        </svg>
-      )
-    },
-    { 
-      id: View.AUDIO, 
-      label: t.nav_audio, 
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z" />
-          <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
         </svg>
       )
     },
@@ -69,7 +68,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeView, setView, t }) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 flex justify-around items-center px-2 py-2 z-50 transition-colors">
+    <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 flex justify-around items-center px-2 py-2 z-50 transition-colors safe-bottom">
       {tabs.map(tab => (
         <button
           key={tab.id}

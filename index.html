@@ -1,9 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Lumina Bible</title>
+  
+  <!-- PWA / Mobile Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lumina">
+  <meta name="theme-color" content="#2563EB">
+  <meta name="mobile-web-app-capable" content="yes">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -23,6 +32,15 @@
     body {
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
+      /* Previene el scroll elástico en iOS para una sensación más nativa */
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
+    #root {
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .bible-text {
       font-family: 'Lora', serif;
@@ -37,6 +55,9 @@
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #334155;
     }
+    /* Estilos para que el contenido no quede debajo de la muesca/notch de los celulares modernos */
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
   </style>
 <script type="importmap">
 {

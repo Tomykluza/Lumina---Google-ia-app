@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, AppSettings } from '../types';
 
 interface ProfileProps {
@@ -11,9 +11,22 @@ interface ProfileProps {
   onUpdateSettings: (settings: Partial<AppSettings>) => void;
   onLogout: () => void;
   onLoginClick: () => void;
+  onOpenDashboard?: () => void;
 }
 
-const Profile: React.FC<ProfileProps> = ({ t, user, textSize, setTextSize, settings, onUpdateSettings, onLogout, onLoginClick }) => {
+const Profile: React.FC<ProfileProps> = ({ t, user, textSize, setTextSize, settings, onUpdateSettings, onLogout, onLoginClick, onOpenDashboard }) => {
+  const [copied, setCopied] = useState(false);
+  const currentUrl = window.location.href;
+  
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}&bgcolor=f8fafc&margin=10`;
+  const qrUrlDark = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}&bgcolor=0f172a&color=ffffff&margin=10`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(currentUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="px-6 py-8 space-y-10 pb-24 transition-colors">
       {user ? (
@@ -25,7 +38,10 @@ const Profile: React.FC<ProfileProps> = ({ t, user, textSize, setTextSize, setti
             </div>
           </div>
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">{user.name}</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">{user.email}</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">{user.email}</p>
+          {user.role === 'admin' && (
+            <span className="bg-blue-100 text-blue-600 text-[9px] font-black uppercase px-2 py-0.5 rounded-full tracking-widest">Administrador</span>
+          )}
           <button 
             onClick={onLogout}
             className="mt-4 text-xs font-bold text-red-500 uppercase tracking-widest hover:opacity-70 transition-opacity"
@@ -45,6 +61,62 @@ const Profile: React.FC<ProfileProps> = ({ t, user, textSize, setTextSize, setti
             {t.login_google}
           </button>
         </div>
+      )}
+
+      {/* Share Section with QR */}
+      <section className="space-y-4">
+        <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-2">Llevar a mi Celular</h3>
+        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col items-center gap-6 relative overflow-hidden">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-inner">
+            <img 
+              src={settings.theme === 'dark' ? qrUrlDark : qrUrl} 
+              alt="App QR Code" 
+              className="w-48 h-48"
+            />
+          </div>
+          <div className="text-center space-y-2">
+            <p className="text-sm font-bold text-slate-700 dark:text-slate-200">¡Escanea y listo!</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Abre la cámara de tu móvil para entrar.</p>
+          </div>
+          <button 
+            onClick={copyToClipboard}
+            className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${copied ? 'bg-green-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 active:scale-95'}`}
+          >
+            {copied ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                Enlace Copiado
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copiar Enlace
+              </>
+            )}
+          </button>
+        </div>
+      </section>
+
+      {/* Admin Panel Access */}
+      {user?.role === 'admin' && (
+        <section className="space-y-4 animate-in slide-in-from-bottom-4 duration-700">
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-2">Herramientas</h3>
+          <button 
+            onClick={onOpenDashboard}
+            className="w-full flex items-center justify-between p-6 bg-blue-600 text-white rounded-[2rem] shadow-xl shadow-blue-500/20 active:scale-[0.98] transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 3v18"/><path d="M3 9h18"/></svg>
+              </div>
+              <div className="text-left">
+                <p className="font-bold text-lg">Panel de Administración</p>
+                <p className="text-blue-100 text-xs opacity-80">Gestionar planes, audio y contenido</p>
+              </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </section>
       )}
 
       {/* Settings Sections */}

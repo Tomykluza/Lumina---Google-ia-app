@@ -6,7 +6,8 @@ export enum View {
   AUDIO = 'audio',
   PROFILE = 'profile',
   DASHBOARD = 'dashboard',
-  PLAN_DETAIL = 'plan_detail'
+  PLAN_DETAIL = 'plan_detail',
+  AI_STUDY = 'ai_study'
 }
 
 export interface AppSettings {
@@ -112,4 +113,9 @@ export interface BibleVerse {
   chapter: number;
   book: string;
   versionId: string;
+}
+
+export interface AIChatMessage {
+  role: 'user' | 'model';
+  text: string;
 }
